@@ -1,0 +1,28 @@
+{% extends 'globus-portal-framework/v2/base.html' %}
+
+{% block body %}
+
+<div class="jumbotron">
+    <h1 class="display-4">Control Centre</h1>
+    <div class="row mb-5">
+      <div class="col"></div>
+      <div class="col-10">
+          <h1 class="text-center">{% block checkout_title %}Flows{% endblock %}</h1>
+          {% for flow in flows %}
+          <div class="card my-3">
+              <div class="card-body">
+                  <h5 class="card-title">{{ flow.title }}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">Author: {{ flow.author }}</h6>
+                  <p class="card-text">{{ flow.description }}</p>
+                  <p>{{ flow.name }}</p>
+                  <a href="{% url flow.name flow.uuid %}" class="btn btn-primary">Start Flow</a>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+      <div class="col"></div>
+    </div>
+
+  
+
+  {% endblock %}

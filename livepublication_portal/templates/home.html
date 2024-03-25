@@ -1,0 +1,19 @@
+{% extends 'globus-portal-framework/v2/base.html' %}
+{% load filters %}
+
+{% block body %}
+
+<div class="jumbotron">
+    
+    {% if request.user.is_authenticated %}
+      <h1 class="display-5">Hi {{ request.user.username|split_username }}</h1>
+      <p class="lead">Head to the Control Center to start executing flows</p>
+    {% else %}
+      <h1 class="display-5">Hi Guest</h1>
+      <p class="lead">Browse publciations, or view the current state of the hosted LivePublications!</p>
+    {% endif %}
+    <hr class="my-4">    
+  </div>
+
+{% endblock %}
+

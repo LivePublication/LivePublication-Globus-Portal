@@ -4,26 +4,23 @@ or delete any prior flows before running this example.
 
 Make sure also to install Gladier (pip install gladier)
 """
-from gladier import GladierBaseClient
-from pprint import pprint
+import os, sys
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+sys.path.append(project_root)
 
 """
 This file contains a single LivePublication Action Provider flow using Gladier & Globus interfaces. 
 It serves as an experimental testbench for the LivePublication CLI.
 """
-import json
-import time
-import os
 
 from gladier import GladierBaseClient, generate_flow_definition
-from globus_sdk.scopes import GCSCollectionScopeBuilder
-from pprint import pprint
-from datetime import datetime
-
 # Import config variables & custom tools
-from config import DataStoreUUID, ComputeUUID, CollectionIDs, Compute_DS_UUID, InputPath, OutputPath, TransferFile
-from BeeMovie_components.BeeMovieScript import GetBeeMovieScript
-from BeeMovie_components.ListDirectory import FileSystemListCommand
+from livepublication_portal.flows.BeeMovie.local_config import DataStoreUUID, ComputeUUID, Compute_DS_UUID, InputPath, OutputPath, TransferFile
+from livepublication_portal.flows.BeeMovie.flow_components.BeeMovieScript import GetBeeMovieScript
+from livepublication_portal.flows.BeeMovie.flow_components.ListDirectory import FileSystemListCommand
+from livepublication_portal.flows.utils import update_flows_json, FlowInfo
 
 
 @staticmethod
@@ -39,10 +36,10 @@ class BeeMovieScript(GladierBaseClient):
     used as the software components of each action.
     """
     gladier_tools = [
-        # "gladier_tools.globus.Transfer:ToCompute",
+        "gladier_tools.globus.Transfer:ToCompute",
         FileSystemListCommand,
-        # GetBeeMovieScript,
-        # "gladier_tools.globus.Transfer:FromCompute"
+        GetBeeMovieScript,
+        "gladier_tools.globus.Transfer:FromCompute"
     ]
 
     # LivePublication group access
@@ -51,17 +48,17 @@ class BeeMovieScript(GladierBaseClient):
 flow_input = {
     "input": {
         # Input vars for transfer 1 (FromSource)
-        # "to_compute_transfer_source_endpoint_id": DataStoreUUID,
-        # "to_compute_transfer_destination_endpoint_id": Compute_DS_UUID,
-        # "to_compute_transfer_source_path": os.path.join(OutputPath, TransferFile),
-        # "to_compute_transfer_destination_path": os.path.join(InputPath, TransferFile),
-        # "to_compute_transfer_recursive": False,
+        "to_compute_transfer_source_endpoint_id": DataStoreUUID,
+        "to_compute_transfer_destination_endpoint_id": Compute_DS_UUID,
+        "to_compute_transfer_source_path": os.path.join(OutputPath, TransferFile),
+        "to_compute_transfer_destination_path": os.path.join(InputPath, TransferFile),
+        "to_compute_transfer_recursive": False,
         # Input vars for transfer 2 (ToDestination)
-        # "from_compute_transfer_source_endpoint_id": Compute_DS_UUID,
-        # "from_compute_transfer_destination_endpoint_id": DataStoreUUID,
-        # "from_compute_transfer_source_path": os.path.join(OutputPath, TransferFile),
-        # "from_compute_transfer_destination_path": os.path.join(InputPath, TransferFile),
-        # "from_compute_transfer_recursive": False,
+        "from_compute_transfer_source_endpoint_id": Compute_DS_UUID,
+        "from_compute_transfer_destination_endpoint_id": DataStoreUUID,
+        "from_compute_transfer_source_path": os.path.join(OutputPath, TransferFile),
+        "from_compute_transfer_destination_path": os.path.join(InputPath, TransferFile),
+        "from_compute_transfer_recursive": False,
         # Compute Endpoint for interfacing with the compute endpoint
         "compute_endpoint": ComputeUUID
     }
@@ -79,46 +76,25 @@ if __name__ == "__main__":
     url = f"https://app.globus.org/flows/{fid}"
     print(f"You can view the flow from the Globus Webapp here: {url}")
 
-
-
     """
     Define the flow information for this flow. 
     This is used to populate the flow information cards in 
     the control-centre. 
     Note: clear the flows.json file when re-configuring with this script
     """
-    flow_info = {
-        'title': 'Bee Movie Flow',
-        'name': "bee-flow",
-        'author': 'Augustus Ellerm',
-        'class': 'Example',
-        'uuid': fid,
-        'url': url,
-        'description': 'An example flow that prints "hello_world" and sleeps for a given time.',
-        'start_url': 'hello-world/',  # You will need to define a URL for starting the flow in your Django app
-    }
+    flow_info = FlowInfo(
+        title='Bee Movie Flow',
+        name="bee-flow",
+        author='Augustus Ellerm',
+        class_name='Example',
+        uuid=fid,
+        url=url,
+        description='An example flow that prints "hello_world" and sleeps for a given time.',
+        start_url='hello-world/',  # You will need to define a URL for starting the flow in your Django app
+        compute_function_ids=compute_function_ids
+    )
 
-    if compute_function_ids:
-        flow_info['compute_functions'] = compute_function_ids
-
-    # Read existing flows and update with new flow information
-    flows = []
-    try:
-        with open('flows/flows.json', 'r') as f:
-            for line in f:
-                flow = json.loads(line.strip())
-                if flow['title'] != flow_info['title']:
-                    flows.append(flow)
-    except FileNotFoundError:
-        pass  # File doesn't exist yet, no need to read
-
-    flows.append(flow_info)
-
-    # Rewrite the flows.json file with updated flow information
-    with open('flows/flows.json', 'w') as f:
-        for flow in flows:
-            json.dump(flow, f)
-            f.write('\n')
+    update_flows_json(flow_info)
 
     # # Run the flow and track progress, if you want to test!
     # flow_input = {

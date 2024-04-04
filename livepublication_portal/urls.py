@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("hello-flow/<uuid:uuid>/", views.hello_flow, name="hello-flow"),
     path("bee-flow/<uuid:uuid>/", views.bee_flow, name="bee-flow"),
+    path("ls-flow/<uuid:uuid>/", views.ls_flow, name="ls-flow"),
     path("publications/", views.publications, name="publications"),
     path("system-status/", views.system_status, name="system-status"),
     path("control-centre/", views.control_centre, name="control-centre"),

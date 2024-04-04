@@ -21,7 +21,7 @@ CollectionIDs = [DataStoreUUID,
                  Compute_DS_UUID]
 
 # Client compute endpoint
-ComputeUUID = "dc4ed5b5-3b27-4561-9f53-d561a4993744"
+ComputeUUID = "233e6bfe-4e63-41ba-a826-40ab5a364480"
 
 # Config for the LPAP flow
 flow_config = {

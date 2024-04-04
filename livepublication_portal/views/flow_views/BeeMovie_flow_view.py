@@ -47,7 +47,7 @@ class BeeMovieForm(forms.Form):
     from_compute_transfer_recursive = forms.BooleanField(initial=False, required=False)
 
     # Compute Endpoint for interfacing with the compute endpoint
-    compute_endpoint = forms.CharField(initial="dc4ed5b5-3b27-4561-9f53-d561a4993744", disabled=True, label="Compute Node", max_length=100)
+    compute_endpoint = forms.CharField(initial="233e6bfe-4e63-41ba-a826-40ab5a364480", disabled=True, label="Compute Node", max_length=100)
 
     # Load the JSON file
     
@@ -75,16 +75,16 @@ def bee_flow(request, uuid):
         if form.is_valid():
             # Prepare the input data for the flow
             input_data = {
-                # "to_compute_transfer_source_endpoint_id": form.cleaned_data["to_compute_transfer_source_endpoint_id"],
-                # "to_compute_transfer_destination_endpoint_id": form.cleaned_data["to_compute_transfer_destination_endpoint_id"],
-                # "to_compute_transfer_source_path": form.cleaned_data["to_compute_transfer_source_path"],
-                # "to_compute_transfer_destination_path": form.cleaned_data["to_compute_transfer_destination_path"],
-                # "to_compute_transfer_recursive": form.cleaned_data["to_compute_transfer_recursive"],
-                # "from_compute_transfer_source_endpoint_id": form.cleaned_data["from_compute_transfer_source_endpoint_id"],
-                # "from_compute_transfer_destination_endpoint_id": form.cleaned_data["from_compute_transfer_destination_endpoint_id"],
-                # "from_compute_transfer_source_path": form.cleaned_data["from_compute_transfer_source_path"],
-                # "from_compute_transfer_destination_path": form.cleaned_data["from_compute_transfer_destination_path"],
-                # "from_compute_transfer_recursive": form.cleaned_data["from_compute_transfer_recursive"],
+                "to_compute_transfer_source_endpoint_id": form.cleaned_data["to_compute_transfer_source_endpoint_id"],
+                "to_compute_transfer_destination_endpoint_id": form.cleaned_data["to_compute_transfer_destination_endpoint_id"],
+                "to_compute_transfer_source_path": form.cleaned_data["to_compute_transfer_source_path"],
+                "to_compute_transfer_destination_path": form.cleaned_data["to_compute_transfer_destination_path"],
+                "to_compute_transfer_recursive": form.cleaned_data["to_compute_transfer_recursive"],
+                "from_compute_transfer_source_endpoint_id": form.cleaned_data["from_compute_transfer_source_endpoint_id"],
+                "from_compute_transfer_destination_endpoint_id": form.cleaned_data["from_compute_transfer_destination_endpoint_id"],
+                "from_compute_transfer_source_path": form.cleaned_data["from_compute_transfer_source_path"],
+                "from_compute_transfer_destination_path": form.cleaned_data["from_compute_transfer_destination_path"],
+                "from_compute_transfer_recursive": form.cleaned_data["from_compute_transfer_recursive"],
                 "compute_endpoint": form.cleaned_data["compute_endpoint"]
             }
 
@@ -98,7 +98,7 @@ def bee_flow(request, uuid):
             authorizer = globus_sdk.AccessTokenAuthorizer(token)
             sfc = globus_sdk.SpecificFlowClient(str(uuid), authorizer=authorizer)
             run = sfc.run_flow(
-                body={"input": input_data},
+                body={"input":input_data},
                 tags=form.cleaned_data["tags"].split(","),
                 label=form.cleaned_data["label"],
             )

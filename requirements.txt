@@ -7,3 +7,7 @@ crispy-bootstrap4>=2022.1
 # Used only for create_flow.py
 gladier
 gladier_tools
+
+# Used only for https proxy
+python-openstackclient
+python-designateclient

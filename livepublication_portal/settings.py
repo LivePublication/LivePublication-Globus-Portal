@@ -28,7 +28,7 @@ PROJECT_TITLE = "LivePublication"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['orchestration-node.livepup-globus.cloud.edu.au', 'localhost', '127.0.0.1']
 
 # Application definition
 

@@ -1,7 +1,6 @@
 from django.urls import include, path
 from livepublication_portal import views
 
-
 urlpatterns = [
     # Our custom views
     path("", views.home, name="home"),

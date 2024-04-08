@@ -1,0 +1,13 @@
+[Unit]
+Description=Live Publication Globus Portal
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/LivePublication-Globus-Portal
+ExecStart=/home/ubuntu/LivePublication-Globus-Portal/.venv/bin/gunicorn -b localhost:8000 -w 4 --log-file /home/ubuntu/gunicorn.log --log-level DEBUG wsgi:application
+# Environment="PATH=/bin/"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

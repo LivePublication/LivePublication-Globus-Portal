@@ -25,10 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-generate-new-key-with-openssl-rand-hex-32-asdf-aoeu"
 
 PROJECT_TITLE = "LivePublication"
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['orchestration-node.livepup-globus.cloud.edu.au', 'localhost', '127.0.0.1']
+# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+
+# Enable proxy https responses
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+
+ALLOWED_HOSTS = ['orchestration-ui.livepup-globus.cloud.edu.au', 'localhost', '127.0.0.1']
 
 # Application definition
 

@@ -23,3 +23,7 @@ may run the flow. Runnable_by may also be modified via the webapp.
 ## My Flows not working!
 
 An area to start building out with common painpoints.
+
+### Notes
+
+Gunicorn server - run from inside LivePublication-Globus-portal `gunicorn --bind <host>:<port> wsgi:application`

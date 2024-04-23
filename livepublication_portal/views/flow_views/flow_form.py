@@ -16,7 +16,7 @@ class BaseFlowForm(forms.Form):
         help_text="A nice label to add context to this flow",
     )
     tags = forms.CharField(
-        initial="LivePublication, Test"
+        initial="LivePublication, Test",
         label="Tags",
         max_length=256,
         help_text="Tags help categorize many runs over time. Use a comma-separated list.",

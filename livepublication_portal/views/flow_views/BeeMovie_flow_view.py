@@ -9,88 +9,83 @@ from django.conf import settings
 from django import forms
 from globus_portal_framework.gclients import load_globus_access_token
 
+from .flow_form import BaseFlowForm  
+
 log = logging.getLogger(__name__)
 
-class BeeMovieForm(forms.Form):
-    """
-    This is a Django form to control and validate user input fields.
-
-    https://docs.djangoproject.com/en/4.2/topics/forms/
-
-    Typically this would go into its own forms.py class, but it's added here for simplicity.
-    """
-
-    label = forms.CharField(
-        initial="An exmaple flow",
-        max_length=256,
-        help_text="A nice label to add context to this flow",
-    )
-
-    tags = forms.CharField(
-        label="Tags",
-        max_length=256,
-        help_text="Tags help categorize many runs over time. You can use a comma separated list here.",
-    )
-
-    # Input vars for transfer 1 (FromSource)
-    to_compute_transfer_source_endpoint_id = forms.CharField(initial="b782400e-3e59-412c-8f73-56cd0782301f", max_length=100)
-    to_compute_transfer_destination_endpoint_id = forms.CharField(initial="d920d765-dda0-41cb-a30e-11f5a5f455a4", max_length=100)
-    to_compute_transfer_source_path = forms.CharField(initial="/output/test.txt", max_length=256)
-    to_compute_transfer_destination_path = forms.CharField(initial="/input/test.txt", max_length=256)
-    to_compute_transfer_recursive = forms.BooleanField(initial=False, required=False)
-
-    # Input vars for transfer 2 (ToDestination)
-    from_compute_transfer_source_endpoint_id = forms.CharField(initial="d920d765-dda0-41cb-a30e-11f5a5f455a4", max_length=100)
-    from_compute_transfer_destination_endpoint_id = forms.CharField(initial="b782400e-3e59-412c-8f73-56cd0782301f", max_length=100)
-    from_compute_transfer_source_path = forms.CharField(initial="/output/test.txt", max_length=256)
-    from_compute_transfer_destination_path = forms.CharField(initial="/input/test.txt", max_length=256)
-    from_compute_transfer_recursive = forms.BooleanField(initial=False, required=False)
-
-    # Compute Endpoint for interfacing with the compute endpoint
-    compute_endpoint = forms.CharField(initial="233e6bfe-4e63-41ba-a826-40ab5a364480", disabled=True, label="Compute Node", max_length=100)
-
-    # Load the JSON file
-    
+class BeeMovieForm(BaseFlowForm):
     def __init__(self, *args, **kwargs):
-      super().__init__(*args, **kwargs)
-
-      # Load the JSON file
-      data = []
-      with open(os.path.join(settings.BASE_DIR, 'livepublication_portal', 'flows', 'flows.json'), 'r') as f:
-          for line in f:
-              data.append(json.loads(line))
-      bee_flow_object = next(item for item in data if item["name"] == "bee-flow")
-      self.compute_functions_dict = bee_flow_object["compute_functions"]
-      log.debug(f"Loaded compute functions: {self.compute_functions_dict}")
-
-      # Add fields dynamically
-      for key, value in self.compute_functions_dict.items():
-          self.fields[key] = forms.CharField(initial=value, disabled=True, label=key)
-          log.debug(f"Added compute function {key} with value {value}")
+        custom_fields = {
+            'to_compute_transfer_source_endpoint_id': forms.CharField(
+                label="Source Endpoint ID",
+                initial="b782400e-3e59-412c-8f73-56cd0782301f",
+                max_length=100,
+                help_text="Identifier for the source Globus endpoint for initial transfer."
+            ),
+            'to_compute_transfer_destination_endpoint_id': forms.CharField(
+                label="Destination Endpoint ID",
+                initial="d920d765-dda0-41cb-a30e-11f5a5f455a4",
+                max_length=100,
+                help_text="Identifier for the destination Globus endpoint for initial transfer."
+            ),
+            'to_compute_transfer_source_path': forms.CharField(
+                label="Source Path",
+                initial="/output/test.txt",
+                max_length=256,
+                help_text="File path at the source endpoint for the initial transfer."
+            ),
+            'to_compute_transfer_destination_path': forms.CharField(
+                label="Destination Path",
+                initial="/input/test.txt",
+                max_length=256,
+                help_text="File path at the destination endpoint for the initial transfer."
+            ),
+            'to_compute_transfer_recursive': forms.BooleanField(
+                label="Recursive Transfer",
+                initial=False,
+                required=False,
+                help_text="Set to true to enable recursive transfer from the source."
+            ),
+            'from_compute_transfer_source_endpoint_id': forms.CharField(
+                label="Source Endpoint ID (Return)",
+                initial="d920d765-dda0-41cb-a30e-11f5a5f455a4",
+                max_length=100,
+                help_text="Identifier for the source Globus endpoint for return transfer."
+            ),
+            'from_compute_transfer_destination_endpoint_id': forms.CharField(
+                label="Destination Endpoint ID (Return)",
+                initial="b782400e-3e59-412c-8f73-56cd0782301f",
+                max_length=100,
+                help_text="Identifier for the destination Globus endpoint for return transfer."
+            ),
+            'from_compute_transfer_source_path': forms.CharField(
+                label="Source Path (Return)",
+                initial="/output/test.txt",
+                max_length=256,
+                help_text="File path at the source endpoint for the return transfer."
+            ),
+            'from_compute_transfer_destination_path': forms.CharField(
+                label="Destination Path (Return)",
+                initial="/input/test.txt",
+                max_length=256,
+                help_text="File path at the destination endpoint for the return transfer."
+            ),
+            'from_compute_transfer_recursive': forms.BooleanField(
+                label="Recursive Transfer (Return)",
+                initial=False,
+                required=False,
+                help_text="Set to true to enable recursive transfer to the destination."
+            )
+        }
+        super().__init__(flow_name='bee-flow', extra_fields=custom_fields, *args, **kwargs)
 
 @login_required
 def bee_flow(request, uuid):
     if request.method == "POST":
         form = BeeMovieForm(request.POST)
         if form.is_valid():
-            # Prepare the input data for the flow
-            input_data = {
-                "to_compute_transfer_source_endpoint_id": form.cleaned_data["to_compute_transfer_source_endpoint_id"],
-                "to_compute_transfer_destination_endpoint_id": form.cleaned_data["to_compute_transfer_destination_endpoint_id"],
-                "to_compute_transfer_source_path": form.cleaned_data["to_compute_transfer_source_path"],
-                "to_compute_transfer_destination_path": form.cleaned_data["to_compute_transfer_destination_path"],
-                "to_compute_transfer_recursive": form.cleaned_data["to_compute_transfer_recursive"],
-                "from_compute_transfer_source_endpoint_id": form.cleaned_data["from_compute_transfer_source_endpoint_id"],
-                "from_compute_transfer_destination_endpoint_id": form.cleaned_data["from_compute_transfer_destination_endpoint_id"],
-                "from_compute_transfer_source_path": form.cleaned_data["from_compute_transfer_source_path"],
-                "from_compute_transfer_destination_path": form.cleaned_data["from_compute_transfer_destination_path"],
-                "from_compute_transfer_recursive": form.cleaned_data["from_compute_transfer_recursive"],
-                "compute_endpoint": form.cleaned_data["compute_endpoint"]
-            }
-
-            # Add the dynamic fields to the input data
-            for key in form.compute_functions_dict.keys():
-                input_data[key] = form.cleaned_data[key]
+            # Prepare input data from the form
+            input_data = {key: form.cleaned_data[key] for key in form.fields if key in form.cleaned_data}
 
             # Start the flow with the input data
             log.debug(f"Loading flow token for user {request.user.username}")

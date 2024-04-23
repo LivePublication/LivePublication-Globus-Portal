@@ -25,7 +25,10 @@ class FlowInfo:
             'start_url': self.start_url
         }
         if self.compute_function_ids:
+            flow_info_dict['uses_compute'] = True
             flow_info_dict['compute_functions'] = self.compute_function_ids
+        else:
+            flow_info_dict['uses_compute'] = False
         return flow_info_dict
 
 def update_flows_json(flow_info):

@@ -12,9 +12,8 @@
           <div class="card my-3">
               <div class="card-body">
                   <h5 class="card-title">{{ flow.title }}</h5>
-                  <h6 class="card-subtitle mb-2 text-muted">Author: {{ flow.author }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted">Author: {{ flow.author }} | Compute dependent: {{ flow.uses_compute }}</h6>
                   <p class="card-text">{{ flow.description }}</p>
-                  <p>{{ flow.name }}</p>
                   <a href="{% url flow.name flow.uuid %}" class="btn btn-primary">Start Flow</a>
               </div>
           </div>

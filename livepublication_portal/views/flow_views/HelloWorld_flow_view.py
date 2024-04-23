@@ -1,63 +1,30 @@
 import logging
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
+from django.shortcuts import render
 from django import forms
-
+from django.contrib.auth.decorators import login_required
+from .flow_form import BaseFlowForm  
 import globus_sdk
 from globus_portal_framework.gclients import load_globus_access_token
 
-
 log = logging.getLogger(__name__)
 
-
-class HelloFlowForm(forms.Form):
-    """
-    This is a Django form to control and validate user input fields.
-
-    https://docs.djangoproject.com/en/4.2/topics/forms/
-
-    Typically this would go into its own forms.py class, but it's added here for simplicity.
-    """
-
-    echo_string = forms.CharField(
-        label="Echo String",
-        initial="Hello World!",
-        max_length=256,
-        help_text="Something to echo inside the flow",
-    )
-    sleep_time = forms.IntegerField(help_text="How long to pause flow execution")
-    label = forms.CharField(
-        initial="An example run started via DGPF",
-        max_length=256,
-        help_text="A nice label to add context to this flow",
-    )
-    tags = forms.CharField(
-        label="Tags",
-        max_length=256,
-        help_text="Tags help categorize many runs over time. You can use a comma separated list here.",
-    )
-
-    def clean_sleep_time(self):
-        """Extra validation and a bit of fun"""
-        if self.cleaned_data["sleep_time"] == 3:
-            raise forms.ValidationError(
-                "Value may not be '3'. This number is cursed and may not be used."
+class HelloFlowForm(BaseFlowForm):
+    def __init__(self, *args, **kwargs):
+        custom_fields = {
+            'echo_string': forms.CharField(
+                label="Echo String",
+                initial="Hello World!",
+                max_length=256,
+                help_text="Something to echo inside the flow",
+            ),
+            'sleep_time': forms.IntegerField(
+                help_text="How long to pause flow execution"
             )
-        return self.cleaned_data["sleep_time"]
-
+        }
+        super().__init__(flow_name='hello-flow', extra_fields=custom_fields, *args, **kwargs)
 
 @login_required
 def hello_flow(request, uuid):
-    """
-    This view is the heart of this project. It behaves a few different ways.
-    First, it renders the form above in normal GET requests, and allows the user to
-    populate it with values.
-
-    When a user POSTs a valid form, it loads a _user_ access token and starts the flow
-    as the user with the values they provide. The JSON response is given directly to
-    the template, and used to build a link to the webapp to track progress.
-    """
     if request.method == "POST":
         form = HelloFlowForm(request.POST)
         if form.is_valid():
@@ -65,13 +32,13 @@ def hello_flow(request, uuid):
             token = load_globus_access_token(request.user, str(uuid))
             authorizer = globus_sdk.AccessTokenAuthorizer(token)
             sfc = globus_sdk.SpecificFlowClient(str(uuid), authorizer=authorizer)
+
+            # Prepare input data from the form
+            input_data = {key: form.cleaned_data[key] for key in form.fields if key in form.cleaned_data}
+
+            # Start the flow with the collected input data
             run = sfc.run_flow(
-                body={
-                    "input": {
-                        "echo_string": form.cleaned_data["echo_string"],
-                        "sleep_time": form.cleaned_data["sleep_time"],
-                    },
-                },
+                body={"input": input_data},
                 label=form.cleaned_data["label"],
                 tags=form.cleaned_data["tags"].split(","),
             )
@@ -84,12 +51,12 @@ def hello_flow(request, uuid):
                 'flow_url': f"https://app.globus.org/runs/{run.data['run_id']}/"
             }
             return render(request, "flow-started.html", context)
-        log.debug(
-            f"User {request.user.username} failed to start flow due to {len(form.errors)} form errors."
-        )
+        else:
+            log.debug(
+                f"User {request.user.username} failed to start flow due to {len(form.errors)} form errors."
+            )
     else:
-        log.debug(f"Loading new form for user {request.user.username}")
-        form = HelloFlowForm()
+        form = HelloFlowForm() 
 
     context = {'form': form}
     return render(request, "flow-init.html", context)

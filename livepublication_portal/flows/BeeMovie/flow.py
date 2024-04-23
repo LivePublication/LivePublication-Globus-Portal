@@ -89,7 +89,7 @@ if __name__ == "__main__":
         class_name='Example',
         uuid=fid,
         url=url,
-        description='An example flow that prints "hello_world" and sleeps for a given time.',
+        description='Transfers an empty text file to compute -> downoads BeeMovie script using compute -> Transfers back to store.',
         start_url='hello-world/',  # You will need to define a URL for starting the flow in your Django app
         compute_function_ids=compute_function_ids
     )

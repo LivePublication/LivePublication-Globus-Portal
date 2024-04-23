@@ -28,6 +28,27 @@
       </div>
     </div>
     <div class="col"></div>
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+          var computeSelect = document.getElementById('id_compute_endpoint');  // Adjust the ID as necessary
+          var lpField = document.getElementById('id_lp_orchestration_server_uuid');  // Adjust the ID as necessary
+  
+          function toggleLpField() {
+              if (computeSelect.value == '58fb6f2d-ff78-4f39-9669-38c12d01f566') {
+                  lpField.style.display = '';
+              } else {
+                  lpField.style.display = 'none';
+              }
+          }
+  
+          // Event listener for changes on the compute endpoint select field
+          computeSelect.addEventListener('change', toggleLpField);
+  
+          // Initial check in case the form is re-rendered with selected values
+          toggleLpField();
+      });
+  </script>
 </div>
 
 {% endblock %}

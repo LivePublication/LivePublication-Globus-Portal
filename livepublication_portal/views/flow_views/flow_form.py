@@ -59,7 +59,24 @@ class BaseFlowForm(forms.Form):
                 help_text="Choose the compute endpoint to run the flow on",
             )
 
-            # Dynamically add fields for compute functions
+            # Add the LivePublication Orchestration Server UUID field, initially hidden
+            self.fields['lp_orchestration_server_uuid'] = forms.CharField(
+                max_length=36,
+                required=False, 
+                label="",
+                widget=forms.TextInput(attrs={
+                    'style': 'display:none;',
+                    'placeholder': "Enter LivePublication Orchestration Server UUID"
+                    }
+                ),
+            )
+
+            # Check if compute_endpoint has been passed and adjust visibility
+            if 'compute_endpoint' in self.data:
+                if self.data['compute_endpoint'] == '58fb6f2d-ff78-4f39-9669-38c12d01f566':
+                    self.fields['lp_orchestration_server_uuid'].widget.attrs['style'] = ''
+
+            # Add compute function fields for visability
             compute_functions = flow_config.get('compute_functions', {})
             for function_key, function_id in compute_functions.items():
                 self.fields[function_key] = forms.CharField(

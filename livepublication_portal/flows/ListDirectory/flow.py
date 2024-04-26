@@ -28,8 +28,10 @@ class Example_Flow(GladierBaseClient):
     used as the software components of each action.
     """
     gladier_tools = [
-        FileSystemListCommand
+        FileSystemListCommand,
     ]
+
+    globus_group = "9e155e5c-e011-11ee-a4a3-8fbdadf65a0b"
 
 flow_input = {
     "input": {
@@ -42,7 +44,8 @@ flow_input = {
 if __name__ == "__main__":
     ls_client = Example_Flow()
     ls_client.sync_flow()
-    fid = ls_client.get_flow_id()
+    fid = ls_client.get_flow_id() 
+    flow = ls_client.run_flow(flow_input=flow_input)
     compute_function_ids = ls_client.get_compute_function_ids()
     if compute_function_ids:
         print(f"Compute functions embeeded in this flow: {compute_function_ids}")
